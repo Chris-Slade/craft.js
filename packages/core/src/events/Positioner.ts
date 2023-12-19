@@ -35,7 +35,10 @@ export class Positioner {
 
   private onScrollListener: (e: Event) => void;
 
-  constructor(readonly store: EditorStore, readonly dragTarget: DragTarget) {
+  constructor(
+    readonly store: EditorStore,
+    readonly dragTarget: DragTarget
+  ) {
     this.currentDropTargetId = null;
     this.currentDropTargetCanvasAncestorId = null;
 
@@ -106,25 +109,6 @@ export class Positioner {
         this.dragError = err;
       });
     });
-  }
-
-  private isNearBorders(
-    domInfo: ReturnType<typeof getDOMInfo>,
-    x: number,
-    y: number
-  ) {
-    const { top, bottom, left, right } = domInfo;
-
-    if (
-      top + Positioner.BORDER_OFFSET > y ||
-      bottom - Positioner.BORDER_OFFSET < y ||
-      left + Positioner.BORDER_OFFSET > x ||
-      right - Positioner.BORDER_OFFSET < x
-    ) {
-      return true;
-    }
-
-    return false;
   }
 
   private isDiff(newPosition: DropPosition) {
@@ -222,20 +206,6 @@ export class Positioner {
 
     this.currentDropTargetId = dropTargetId;
     this.currentDropTargetCanvasAncestorId = newParentNode.id;
-
-    // Get parent if we're hovering at the border of the current node
-    if (
-      newParentNode.data.parent &&
-      this.isNearBorders(getDOMInfo(newParentNode.dom), x, y) &&
-      // Ignore if linked node because there's won't be an adjacent sibling anyway
-      !this.store.query.node(newParentNode.id).isLinkedNode()
-    ) {
-      newParentNode = this.store.query.node(newParentNode.data.parent).get();
-    }
-
-    if (!newParentNode) {
-      return;
-    }
 
     this.currentTargetChildDimensions = this.getChildDimensions(newParentNode);
     this.currentTargetId = newParentNode.id;
